@@ -11,7 +11,7 @@ import SwiftData
 struct ListView: View {
     @ObservedObject var viewModel: ListViewModel
     @Query var tasks: [Task]
-    
+    @Environment(\.modelContext) var modelContext
     private var groupedTasks: [String: [Task]] {
         Dictionary(grouping: tasks, by: { viewModel.customFormattedDate(from: $0.date) })
     }
@@ -37,9 +37,19 @@ struct ListView: View {
                             .listRowSeparator(.hidden)
                         }
                     }
+                }.onDelete { indexSet in
+                    deleteTasks(at: indexSet)
                 }
-            }
-            .listStyle(.plain)
+                
+            }.listStyle(.plain)
+            
+        }
+    }
+    
+    func deleteTasks(at offsets: IndexSet) {
+        for offset in offsets {
+            let task = tasks[offset]
+            modelContext.delete(task)
         }
     }
 }
